@@ -58,7 +58,7 @@ deletelist = []
 
 # Setup the logging
 logging.basicConfig(filename=config['log_file'], level=logging.INFO)
-start_message = 'Start making ' + run + ' snapshots at ' + datetime.today().strftime('%d-%m-%Y %H:%M:%S')
+start_message = 'Start making ' + run + ' snapshots at ' + str(datetime.today())
 message += start_message + "\n" + "\n"
 logging.info(start_message)
 
@@ -103,7 +103,7 @@ for vol in vols:
         count_total += 1
         logging.info(vol)
         print vol
-        description = run + '_snapshot ' + vol.id + '_' + run + '_' + date_suffix + ' by snapshot script at ' + datetime.today().strftime('%d-%m-%Y %H:%M:%S')
+        description = run + '_snapshot ' + vol.id + '_' + run + '_' + date_suffix + ' by snapshot script at ' + str(datetime.today())
         if vol.create_snapshot(description):
             suc_message = 'Snapshot created with description: ' + description
             print '     ' + suc_message
@@ -156,7 +156,7 @@ for vol in vols:
     else:
         count_succes += 1
 
-result = '\nFinished making snapshots at ' + datetime.today().strftime('%d-%m-%Y %H:%M:%S') + ' with ' + str(count_succes) + ' snapshots of ' + str(count_total) + ' possible.'
+result = '\nFinished making snapshots at ' + str(datetime.today()) + ' with ' + str(count_succes) + ' snapshots of ' + str(count_total) + ' possible.'
 message += "\n" + "\n" + result
 message += "\nTotal snapshots created: " + str(total_creates)
 message += "\nTotal snapshots errors: " + str(count_errors)
