@@ -18,8 +18,7 @@
 # version 3.0: Rewrote deleting functions, changed description
 # version 3.1: Fix a bug with the deletelist and added a pause in the volume loop
 
-from boto.ec2.connection import EC2Connection
-from boto.ec2.regioninfo import RegionInfo
+import boto.ec2
 import boto.sns
 from datetime import datetime
 import time
@@ -66,12 +65,9 @@ logging.info(start_message)
 aws_access_key = config['aws_access_key']
 aws_secret_key = config['aws_secret_key']
 ec2_region_name = config['ec2_region_name']
-ec2_region_endpoint = config['ec2_region_endpoint']
 arn = config['arn']
 proxyHost = config['proxyHost']
 proxyPort = config['proxyPort']
-
-region = RegionInfo(name=ec2_region_name, endpoint=ec2_region_endpoint)
 
 # Number of snapshots to keep
 keep_week = config['keep_week']
@@ -80,22 +76,17 @@ keep_month = config['keep_month']
 count_succes = 0
 count_total = 0
 
+connection_kwargs = {
+    'aws_access_key_id': aws_access_key,
+    'aws_secret_access_key': aws_secret_key,
+}
+if proxyHost != '':
+    connection_kwargs['proxy'] = proxyHost
+    connection_kwargs['proxy_port'] = proxyPort
+
 # Connect to AWS using the credentials provided above or in Environment vars.
-if proxyHost == '':
-    # non proxy:
-    conn = EC2Connection(aws_access_key, aws_secret_key, region=region)
-else:
-    # proxy:
-    conn = EC2Connection(aws_access_key, aws_secret_key, region=region, proxy=proxyHost, proxy_port=proxyPort)
-
-# Connect to SNS
-if proxyHost == '':
-    # non proxy:
-    sns = boto.sns.connect_to_region(ec2_region_name, aws_access_key_id=aws_access_key, aws_secret_access_key=aws_secret_key)
-else:
-    # proxy:
-    sns = boto.sns.connect_to_region(ec2_region_name, aws_access_key_id=aws_access_key, aws_secret_access_key=aws_secret_key, proxy=proxyHost, proxy_port=proxyPort)
-
+conn = boto.ec2.connect_to_region(ec2_region_name, **connection_kwargs)
+sns = boto.sns.connect_to_region(ec2_region_name, **connection_kwargs)
 
 vols = conn.get_all_volumes(filters={config['tag_name']: config['tag_value']})
 for vol in vols:
